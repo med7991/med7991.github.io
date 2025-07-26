@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical AI Agent Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #fafafa;
+      border-radius: 5px;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+    .user {
+      font-weight: bold;
+      color: #2a7ae2;
+    }
+    .bot {
+      font-weight: bold;
+      color: #27ae60;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #2a7ae2;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d5fb8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Medical AI Agent Chat</h1>
+    <select id="agent">
+      <option value="internal_medicine">🩺 Internal Medicine</option>
+      <option value="gastroenterology">🧫 Gastroenterology</option>
+      <option value="neurology">🧠 Neurology</option>
+    </select>
+    <div class="chat-box" id="chat"></div>
+    <input type="text" id="message" placeholder="Type your question here..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+
+    function appendMessage(sender, text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message";
+      msgDiv.innerHTML = `<span class="${sender}">${sender === 'user' ? 'You' : 'Agent'}:</span> ${text}`;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const msgInput = document.getElementById("message");
+      const agent = document.getElementById("agent").value;
+      const userMessage = msgInput.value.trim();
+      if (!userMessage) return;
+      appendMessage("user", userMessage);
+      msgInput.value = "";
+
+      // Send to backend
+      try {
+        const response = await fetch("https://your-backend-url/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            agent: agent
+          })
+        });
+        const data = await response.json();
+        appendMessage("bot", data.reply);
+      } catch (error) {
+        appendMessage("bot", "Error contacting the agent. Please try again later.");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
